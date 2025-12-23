@@ -282,7 +282,7 @@ export default function ProfileScreen() {
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => router.push("/profile/edit")}
+              onPress={() => router.push("/(main)/profile/edit")}
             >
               <LinearGradient
                 colors={["#00BCD4", "#00ACC1"]}
