@@ -128,7 +128,7 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
     try {
         console.log("/getMe")
-        const user = await User.findById(req.user._id).populate('shopId');
+        const user = await User.findById(req.user._id);
         console.log(user);
         res.json({ user: user.toPublicJSON() });
     } catch (error) {
