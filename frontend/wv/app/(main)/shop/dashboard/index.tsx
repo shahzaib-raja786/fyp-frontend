@@ -8,6 +8,7 @@ import {
   Package,
   Users,
   Store,
+  RotateCcw,
 } from "lucide-react-native";
 import { useTheme } from "@/src/context/ThemeContext";
 
@@ -29,7 +30,7 @@ export default function ShopDashboard() {
       {/* Header */}
       <Header />
 
-      
+
 
       {/* Main Content */}
       <ScrollView
@@ -72,6 +73,18 @@ export default function ShopDashboard() {
             description="List new item"
             icon={<ShoppingBag size={24} color="#00BCD4" />}
             onPress={() => router.push("/shop/addProduct")}
+          />
+          <QuickActionCard
+            title="Manage Orders"
+            description="View & process orders"
+            icon={<Package size={24} color="#00BCD4" />}
+            onPress={() => router.push("/shop/orders")}
+          />
+          <QuickActionCard
+            title="Manage Returns"
+            description="Handle product returns"
+            icon={<RotateCcw size={24} color="#00BCD4" />}
+            onPress={() => router.push("/shop/returns")}
           />
           <QuickActionCard
             title="Analytics"

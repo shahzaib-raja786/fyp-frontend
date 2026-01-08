@@ -80,16 +80,13 @@ const PostsSection: React.FC<PostsSectionProps> = ({ posts, onCreatePost, onPost
       <View style={styles.postOverlay}>
         <View style={styles.postStats}>
           <View style={styles.statItem}>
-            <Ionicons name="heart" size={12} color="#FFFFFF" />
-            <Text style={styles.statText}>{formatCount(item.likes)}</Text>
+            <Ionicons name="heart" size={12} color="#FFFFFF" /><Text style={styles.statText}>{formatCount(item.likes)}</Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="chatbubble" size={12} color="#FFFFFF" />
-            <Text style={styles.statText}>{formatCount(item.comments)}</Text>
+            <Ionicons name="chatbubble" size={12} color="#FFFFFF" /><Text style={styles.statText}>{formatCount(item.comments)}</Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="share" size={12} color="#FFFFFF" />
-            <Text style={styles.statText}>{formatCount(item.shares)}</Text>
+            <Ionicons name="share" size={12} color="#FFFFFF" /><Text style={styles.statText}>{formatCount(item.shares)}</Text>
           </View>
         </View>
       </View>
@@ -118,7 +115,7 @@ const PostsSection: React.FC<PostsSectionProps> = ({ posts, onCreatePost, onPost
                   </Button>
                 }
               >
-                {(['all','image','video','product'] as const).map((filter) => (
+                {(['all', 'image', 'video', 'product'] as const).map((filter) => (
                   <React.Fragment key={filter}>
                     <Menu.Item
                       onPress={() => {

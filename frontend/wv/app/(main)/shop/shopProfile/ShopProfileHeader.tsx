@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Appbar, Badge } from 'react-native-paper';
-import { ArrowLeft, Bell, Share2 } from 'lucide-react-native';
+import { ArrowLeft, Bell, Share2, LogOut } from 'lucide-react-native';
 import { useTheme, AppTokensType, ThemeColors } from '@/src/context/ThemeContext';
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
   onBack?: () => void;
   onNotification?: () => void;
   onShare?: () => void;
+  onLogout?: () => void;
   notificationCount?: number;
 }
 
@@ -17,6 +18,7 @@ const ShopProfileHeader: React.FC<HeaderProps> = ({
   onBack,
   onNotification,
   onShare,
+  onLogout,
   notificationCount = 0,
 }) => {
   const { colors, tokens } = useTheme();
@@ -26,7 +28,7 @@ const ShopProfileHeader: React.FC<HeaderProps> = ({
 
   return (
     <Appbar.Header style={[styles.header, { backgroundColor: colors.background }]}>
-      
+
       {/* BACK BUTTON */}
       {onBack ? (
         <TouchableOpacity onPress={onBack} style={styles.iconButton}>
@@ -67,6 +69,11 @@ const ShopProfileHeader: React.FC<HeaderProps> = ({
               </Badge>
             )}
           </View>
+        )}
+        {onLogout && (
+          <TouchableOpacity onPress={onLogout} style={styles.iconButton}>
+            <LogOut size={20} color={colors.error || '#f00'} />
+          </TouchableOpacity>
         )}
       </View>
     </Appbar.Header>

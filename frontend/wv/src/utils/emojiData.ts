@@ -1,0 +1,62 @@
+export const EMOJI_LIST = [
+    // Clothing
+    { char: '👕', keywords: 't-shirt shirt clothing top' },
+    { char: '👖', keywords: 'jeans pants clothing denim' },
+    { char: '👗', keywords: 'dress clothing woman' },
+    { char: '👘', keywords: 'kimono clothing asian' },
+    { char: '👙', keywords: 'bikini swimwear clothing' },
+    { char: '👚', keywords: 'blouse clothing woman' },
+    { char: '👔', keywords: 'tie shirt formal clothing' },
+    { char: '🧥', keywords: 'coat jacket clothing winter' },
+    { char: '🧦', keywords: 'socks clothing' },
+    { char: '🧣', keywords: 'scarf clothing winter' },
+    { char: '🧤', keywords: 'gloves clothing winter' },
+
+    // Footwear
+    { char: '👟', keywords: 'shoe sneaker running footwear' },
+    { char: '👞', keywords: 'shoe leather formal footwear' },
+    { char: '👡', keywords: 'sandal shoe footwear woman' },
+    { char: '👢', keywords: 'boot shoe footwear' },
+    { char: '👠', keywords: 'high heel shoe footwear woman' },
+
+    // Accessories
+    { char: '🧢', keywords: 'hat cap baseball accessory' },
+    { char: '👒', keywords: 'hat woman accessory' },
+    { char: '🎩', keywords: 'hat formal accessory' },
+    { char: '🎓', keywords: 'graduation hat cap' },
+    { char: '👑', keywords: 'crown accessory royal' },
+    { char: '🎒', keywords: 'backpack bag accessory school' },
+    { char: '👜', keywords: 'handbag bag accessory woman' },
+    { char: '👛', keywords: 'purse wallet bag accessory' },
+    { char: '💼', keywords: 'briefcase bag work accessory' },
+    { char: '👓', keywords: 'glasses accessory vision' },
+    { char: '🕶️', keywords: 'sunglasses accessory cool' },
+    { char: '💍', keywords: 'ring jewelry accessory' },
+    { char: '💎', keywords: 'gem stone diamond jewelry' },
+    { char: '⌚', keywords: 'watch accessory time' },
+
+    // Electronics & Gadgets
+    { char: '📱', keywords: 'phone mobile electronic' },
+    { char: '💻', keywords: 'laptop computer electronic' },
+    { char: '🎧', keywords: 'headphones music electronic' },
+    { char: '📷', keywords: 'camera photo electronic' },
+    { char: '🎮', keywords: 'game controller electronic' },
+    { char: '🔋', keywords: 'battery power electronic' },
+    { char: '🔌', keywords: 'plug power electronic' },
+    { char: '⌚', keywords: 'smartwatch electronic watch' },
+
+    // Other / Lifestyle
+    { char: '📦', keywords: 'box package delivery default' },
+    { char: '🛍️', keywords: 'bag shopping' },
+    { char: '🎁', keywords: 'gift present' },
+    { char: '🏷️', keywords: 'tag label' },
+    { char: '🧸', keywords: 'teddy bear toy' },
+    { char: '⚽', keywords: 'soccer ball sport' },
+    { char: '🏀', keywords: 'basketball sport' },
+    { char: '💄', keywords: 'lipstick makeup beauty' },
+    { char: '💈', keywords: 'barber beauty' },
+    { char: '🏠', keywords: 'home house' },
+    { char: '🛋️', keywords: 'couch furniture home' },
+    { char: '🛏️', keywords: 'bed furniture home' },
+    { char: '📚', keywords: 'book school education' },
+];

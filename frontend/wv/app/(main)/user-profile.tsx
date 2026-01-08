@@ -369,6 +369,15 @@ export default function UserProfileScreen() {
                 <View style={styles.actionsSection}>
                     <TouchableOpacity
                         style={styles.actionButton}
+                        onPress={() => router.push('/orders')}
+                    >
+                        <Ionicons name="receipt-outline" size={24} color="#666" />
+                        <Text style={styles.actionText}>My Orders</Text>
+                        <Ionicons name="chevron-forward" size={20} color="#999" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.actionButton}
                         onPress={() => setShowPasswordModal(true)}
                     >
                         <Ionicons name="lock-closed-outline" size={24} color="#666" />

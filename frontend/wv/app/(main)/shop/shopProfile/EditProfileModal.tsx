@@ -41,7 +41,7 @@ interface EditProfileModalProps {
     visible: boolean;
     onDismiss: () => void;
     onSave: (profile: any) => void; // temporarily use 'any' or extend ShopProfile
-    initialProfile: any;  
+    initialProfile: any;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -53,17 +53,24 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     const { theme, tokens } = useTheme();
     const styles = makeStyles(theme, tokens);
 
-    const [profile, setProfile] = useState<ShopProfile>(initialProfile);
-    const [avatarUri, setAvatarUri] = useState<string | null>(initialProfile.avatar || null);
-    const [bannerUri, setBannerUri] = useState<string | null>(initialProfile.banner || null);
+    const [profile, setProfile] = useState<ShopProfile>({
+        ...initialProfile,
+        settings: initialProfile?.settings || {
+            notifications: true,
+            showOnline: true,
+            privateAccount: false,
+        }
+    });
+    const [avatarUri, setAvatarUri] = useState<string | null>(initialProfile.avatar || initialProfile.logo?.url || null);
+    const [bannerUri, setBannerUri] = useState<string | null>(initialProfile.banner || initialProfile.bannerImage || null);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     // Reset form whenever modal opens
     useEffect(() => {
         setProfile(initialProfile);
-        setAvatarUri(initialProfile.avatar || null);
-        setBannerUri(initialProfile.banner || null);
+        setAvatarUri(initialProfile.avatar || initialProfile.logo?.url || null);
+        setBannerUri(initialProfile.banner || initialProfile.bannerImage || null);
         setErrors({});
     }, [visible, initialProfile]);
 
@@ -176,7 +183,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                                 <TouchableOpacity onPress={() => pickImage('avatar')}>
                                     <Avatar.Image
                                         size={100}
-                                        source={avatarUri ? { uri: avatarUri } : { uri: 'https://via.placeholder.com/100' }}
+                                        source={avatarUri ? { uri: avatarUri } : { uri: 'https://placehold.co/100' }}
                                         style={styles.avatar}
                                     />
                                     <View style={[styles.avatarOverlay, { opacity: 0.7 }]}>
@@ -306,19 +313,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                                                 {setting === 'notifications'
                                                     ? 'Order Notifications'
                                                     : setting === 'showOnline'
-                                                    ? 'Show Online Status'
-                                                    : 'Private Account'}
+                                                        ? 'Show Online Status'
+                                                        : 'Private Account'}
                                             </Text>
                                             <Text style={styles.settingDescription}>
                                                 {setting === 'notifications'
                                                     ? 'Get notified for new orders'
                                                     : setting === 'showOnline'
-                                                    ? "Display when you're available"
-                                                    : 'Approve followers manually'}
+                                                        ? "Display when you're available"
+                                                        : 'Approve followers manually'}
                                             </Text>
                                         </View>
                                         <Switch
-                                            value={profile.settings[setting]}
+                                            value={profile?.settings?.[setting] ?? true}
                                             onValueChange={value => updateSettings(setting, value)}
                                             color={theme.colors.primary}
                                         />

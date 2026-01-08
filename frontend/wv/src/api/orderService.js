@@ -63,6 +63,38 @@ const orderService = {
             throw error;
         }
     },
+
+    /**
+     * Get shop orders with filters
+     */
+    getShopOrders: async (shopId, filters = {}) => {
+        try {
+            const params = new URLSearchParams();
+            if (filters.status) params.append('status', filters.status);
+            if (filters.page) params.append('page', filters.page.toString());
+            if (filters.limit) params.append('limit', filters.limit.toString());
+
+            const queryString = params.toString();
+            const url = `/orders/shop/${shopId}${queryString ? `?${queryString}` : ''}`;
+
+            const response = await api.get(url);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
+     * Get single order by ID
+     */
+    getOrderById: async (orderId) => {
+        try {
+            const response = await api.get(`/orders/${orderId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 export default orderService;

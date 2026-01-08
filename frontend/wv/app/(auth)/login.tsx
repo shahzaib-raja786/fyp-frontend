@@ -36,6 +36,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const { setAuthenticated } = useAuth();
 
+  const [loginMode, setLoginMode] = useState<"user" | "shop">("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -95,18 +96,36 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      const { authService } = await import("../../src/api");
-      const res = await authService.login(email, password);
+      const { authService, shopService } = await import("../../src/api");
+
+      let res;
+      if (loginMode === "user") {
+        res = await authService.login(email, password);
+      } else {
+        res = await shopService.loginShop(email, password);
+      }
 
       Toast.show({
         type: "success",
         text1: "Login Successful",
-        text2: `Welcome back, ${res.user?.fullName || "User"}!`,
+        text2: `Welcome back, ${loginMode === "user"
+          ? (res.user?.fullName || "User")
+          : (res.shop?.shopName || "Shop Owner")
+          }!`,
       });
 
-      setAuthenticated(true, "user");
+      setAuthenticated(true, loginMode === "user" && res.user?.role === "admin" ? "admin" : loginMode);
       await new Promise((r) => setTimeout(r, 300));
-      router.replace("/(main)/home");
+
+      if (loginMode === "user") {
+        if (res.user?.role === "admin") {
+          router.replace("/(admin)/dashboard");
+        } else {
+          router.replace("/(main)/home");
+        }
+      } else {
+        router.replace("/(main)/shop/dashboard");
+      }
     } catch (e: any) {
       Alert.alert("Login Failed", e.message || "Something went wrong");
     } finally {
@@ -165,6 +184,52 @@ export default function LoginScreen() {
             <Text style={styles.subtitle}>
               Your virtual fashion destination
             </Text>
+
+            {/* Mode Selection */}
+            <View style={styles.modeToggleContainer}>
+              <TouchableOpacity
+                onPress={() => setLoginMode("user")}
+                style={[
+                  styles.modeButton,
+                  loginMode === "user" && styles.modeButtonActive,
+                ]}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={18}
+                  color={loginMode === "user" ? "#fff" : "#666"}
+                />
+                <Text
+                  style={[
+                    styles.modeButtonText,
+                    loginMode === "user" && styles.modeButtonTextActive,
+                  ]}
+                >
+                  Customer
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setLoginMode("shop")}
+                style={[
+                  styles.modeButton,
+                  loginMode === "shop" && styles.modeButtonActive,
+                ]}
+              >
+                <Ionicons
+                  name="storefront-outline"
+                  size={18}
+                  color={loginMode === "shop" ? "#fff" : "#666"}
+                />
+                <Text
+                  style={[
+                    styles.modeButtonText,
+                    loginMode === "shop" && styles.modeButtonTextActive,
+                  ]}
+                >
+                  Shop Owner
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Form */}
@@ -277,7 +342,40 @@ const styles = StyleSheet.create({
 
   brandContainer: {
     alignItems: "center",
-    marginBottom: 36,
+    marginBottom: 24,
+  },
+
+  modeToggleContainer: {
+    flexDirection: "row",
+    backgroundColor: "#F0F0F0",
+    borderRadius: 12,
+    padding: 4,
+    marginTop: 20,
+    width: "100%",
+  },
+
+  modeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 8,
+  },
+
+  modeButtonActive: {
+    backgroundColor: "#000",
+  },
+
+  modeButtonText: {
+    fontSize: 14,
+    fontFamily: authTheme.fonts.semiBold,
+    color: "#666",
+  },
+
+  modeButtonTextActive: {
+    color: "#fff",
   },
 
   appName: {

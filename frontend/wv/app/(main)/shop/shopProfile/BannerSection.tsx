@@ -13,7 +13,7 @@ interface BannerSectionProps {
     name: string;
     ownerName: string;
     avatar?: string;
-    bannerImage?: string;
+    banner?: string;
     isVerified?: boolean;
     isFollowing?: boolean;
     since?: string;
@@ -38,9 +38,9 @@ const BannerSection: React.FC<BannerSectionProps> = ({ shop, onEdit, onFollow, o
       {/* Banner Image */}
       <ImageBackground
         source={
-          shop.bannerImage
-            ? { uri: shop.bannerImage }
-            : { uri: "https://via.placeholder.com/1200x300" }
+          shop.banner
+            ? { uri: shop.banner }
+            : { uri: "https://placehold.co/1200x300" }
         }
         style={styles.banner}
         resizeMode="cover"
@@ -56,7 +56,7 @@ const BannerSection: React.FC<BannerSectionProps> = ({ shop, onEdit, onFollow, o
         <View style={styles.avatarContainer}>
           <Avatar.Image
             size={100}
-            source={shop.avatar ? { uri: shop.avatar } : { uri: "https://via.placeholder.com/100" }}
+            source={shop.avatar ? { uri: shop.avatar } : { uri: "https://placehold.co/100" }}
             style={styles.avatar}
           />
           {shop.isVerified && (
@@ -70,15 +70,13 @@ const BannerSection: React.FC<BannerSectionProps> = ({ shop, onEdit, onFollow, o
           <View style={styles.nameContainer}>
             <Text style={styles.shopName}>{shop.name}</Text>
             <View style={styles.ownerContainer}>
-              <Ionicons name="person-outline" size={14} color={colors.textSecondary} />
-              <Text style={styles.ownerName}> {shop.ownerName}</Text>
+              <Ionicons name="person-outline" size={14} color={colors.textSecondary} /><Text style={styles.ownerName}> {shop.ownerName}</Text>
             </View>
           </View>
 
           {shop.since && (
             <View style={styles.sinceContainer}>
-              <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
-              <Text style={styles.sinceText}> Member since {shop.since}</Text>
+              <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} /><Text style={styles.sinceText}> Member since {shop.since}</Text>
             </View>
           )}
 
@@ -93,7 +91,7 @@ const BannerSection: React.FC<BannerSectionProps> = ({ shop, onEdit, onFollow, o
               </Button>
             )}
 
-            <Button mode="outlined" icon="storefront" onPress={() => {}} style={styles.shopButton} contentStyle={styles.buttonContent}>
+            <Button mode="outlined" icon="storefront" onPress={() => { }} style={styles.shopButton} contentStyle={styles.buttonContent}>
               Visit Shop
             </Button>
           </View>

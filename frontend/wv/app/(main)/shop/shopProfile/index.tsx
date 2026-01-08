@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Provider as PaperProvider } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { Provider as PaperProvider, Text, Button } from 'react-native-paper';
 import ShopProfileHeader from './ShopProfileHeader';
 import BannerSection from './BannerSection';
 import StatsSection from './StatsSection';
@@ -10,41 +10,117 @@ import EditProfileModal from './EditProfileModal';
 import ShareProfileModal from './ShareProfileModal';
 import { appTheme } from '@/src/theme/appTheme';
 import { useTheme } from '@/src/context/ThemeContext';
-
-// Mock data
-const mockShop = {
-  name: 'Fashion Hub',
-  ownerName: 'John Doe',
-  description: 'Welcome to Fashion Hub! We offer the latest fashion trends...',
-  contact: { email: 'contact@fashionhub.com', phone: '+1 (555) 123-4567', address: '123 Fashion Street, NY', website: 'www.fashionhub.com' },
-  hours: { Monday: '9:00 AM - 8:00 PM', Tuesday: '9:00 AM - 8:00 PM' }, // shortened
-  social: { instagram: '@fashionhub', facebook: 'facebook.com/fashionhub', twitter: '@fashionhub_official' },
-  stats: {
-    totalSales: 125430,
-    monthlyRevenue: 18450,
-    conversionRate: 3.2,
-    avgOrderValue: 89.99,
-    visitorCount: 12543,
-    returningCustomers: 42,
-    products: { total: 156, published: 128, draft: 28 },
-    followers: 1245,
-    following: 342,
-    rating: 4.8,
-  },
-};
-
-const mockPosts = [
-  { id: '1', image: 'https://picsum.photos/300/300?random=1', title: 'New Arrival', likes: 234, comments: 45, shares: 12, date: '2024-01-15', type: 'image' as const },
-  { id: '2', image: 'https://picsum.photos/300/300?random=2', title: 'Summer Collection', likes: 189, comments: 32, shares: 8, date: '2024-01-14', type: 'image' as const },
-];
+import { shopService } from '@/src/api';
+import { useAuth } from '@/src/context/AuthContext';
+import { useRouter } from 'expo-router';
 
 const ShopProfileScreen = () => {
   const { isDark, colors, tokens } = useTheme();
+  const { logout } = useAuth();
+  const router = useRouter();
+  const [shopData, setShopData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3);
 
-  // Use the appTheme directly with PaperProvider
+  const fetchShopProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await shopService.getMyShop();
+
+      const shop = response.shop;
+
+      // Fetch shop products as "posts"
+      let productsRes;
+      try {
+        productsRes = await shopService.getShopProducts(shop._id);
+      } catch (err) {
+        console.warn('Could not fetch shop products:', err);
+        productsRes = { products: [] };
+      }
+
+      // Map products to "Posts"
+      const mappedPosts = productsRes.products.map((p: any) => ({
+        id: p._id,
+        image: p.images?.[0]?.url || 'https://placehold.co/300',
+        title: p.name,
+        likes: p.likes || 0,
+        comments: p.reviews?.length || 0,
+        shares: 0,
+        date: p.createdAt,
+        type: p.type || 'product'
+      }));
+
+      // Map backend data to frontend expectations
+      const mappedShop = {
+        ...shop,
+        name: shop.shopName,
+        ownerName: shop.shopUsername || 'Shop Owner',
+        description: shop.description || 'Welcome to our shop!',
+        avatar: shop.logo?.url,
+        banner: shop.banner?.url,
+        contact: {
+          email: shop.email,
+          phone: shop.phone,
+          address: shop.address,
+          website: shop.website,
+        },
+        // Use backend stats or provide defaults
+        stats: {
+          totalSales: shop.stats?.totalSales || 0,
+          monthlyRevenue: shop.stats?.monthlyRevenue || 0,
+          conversionRate: shop.stats?.conversionRate || 0,
+          avgOrderValue: shop.stats?.avgOrderValue || 0,
+          visitorCount: shop.stats?.visitorCount || 0,
+          returningCustomers: shop.stats?.returningCustomers || 0,
+          products: {
+            total: shop.stats?.totalProducts || productsRes.products.length,
+            published: productsRes.products.length,
+            draft: 0
+          },
+          followers: shop.stats?.followers || 0,
+          following: shop.stats?.following || 0,
+          rating: shop.stats?.rating || 0,
+        },
+        settings: shop.settings || {
+          notifications: true,
+          showOnline: true,
+          privateAccount: false
+        },
+        social: shop.social || {
+          instagram: '',
+          facebook: '',
+          twitter: ''
+        },
+        hours: shop.hours || {
+          'Monday': '9:00 AM - 6:00 PM',
+          'Tuesday': '9:00 AM - 6:00 PM',
+          'Wednesday': '9:00 AM - 6:00 PM',
+          'Thursday': '9:00 AM - 6:00 PM',
+          'Friday': '9:00 AM - 6:00 PM',
+          'Saturday': '10:00 AM - 4:00 PM',
+          'Sunday': 'Closed'
+        },
+        posts: mappedPosts
+      };
+
+      setShopData(mappedShop);
+    } catch (err: any) {
+      console.error('Error fetching shop profile:', err);
+      setError(err.message || 'Failed to load shop profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShopProfile();
+  }, []);
+
   const paperTheme = {
     ...appTheme,
     dark: isDark,
@@ -54,14 +130,74 @@ const ShopProfileScreen = () => {
   // Handlers
   const handleEditProfile = () => setEditModalVisible(true);
   const handleShareProfile = () => setShareModalVisible(true);
-  const handleSaveProfile = (updatedProfile: any) => console.log('Profile saved:', updatedProfile);
+  const handleSaveProfile = async (updatedProfile: any) => {
+    try {
+      if (shopData?._id) {
+        // Map back to backend structure
+        const backendData = {
+          shopName: updatedProfile.name,
+          description: updatedProfile.description,
+          email: updatedProfile.contact.email,
+          phone: updatedProfile.contact.phone,
+          address: updatedProfile.contact.address,
+          website: updatedProfile.contact.website,
+          social: updatedProfile.social,
+          settings: updatedProfile.settings,
+          hours: updatedProfile.hours
+        };
+
+        const images = {
+          logo: updatedProfile.avatar,
+          banner: updatedProfile.banner
+        };
+
+        await shopService.updateShop(shopData._id, backendData, images);
+        await fetchShopProfile();
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to update profile');
+    }
+  };
+
   const handleCreatePost = () => Alert.alert('Create Post', 'This would open the post creation screen.');
   const handleViewAnalytics = () => Alert.alert('View Analytics', 'This would open the analytics screen.');
   const handlePostPress = (post: any) => Alert.alert('Post Details', `Viewing post: ${post.title}`);
-  const handleNotificationPress = () => {
-    setNotificationCount(0);
-    Alert.alert('Notifications', 'This would open notifications screen.');
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out of your shop?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.replace('/(auth)/login');
+          }
+        }
+      ]
+    );
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 10, color: colors.text }}>Loading Profile...</Text>
+      </View>
+    );
+  }
+
+  if (error || !shopData) {
+    return (
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.error, marginBottom: 20 }}>{error || 'Shop not found'}</Text>
+        <Button mode="contained" onPress={fetchShopProfile}>Retry</Button>
+      </View>
+    );
+  }
 
   return (
     <PaperProvider theme={paperTheme}>
@@ -70,27 +206,28 @@ const ShopProfileScreen = () => {
           title="Shop Profile"
           onBack={() => console.log('Go back')}
           onShare={handleShareProfile}
-          onNotification={handleNotificationPress}
+          onNotification={() => setNotificationCount(0)}
           notificationCount={notificationCount}
+          onLogout={handleLogout}
         />
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <BannerSection
-            shop={{ ...mockShop, isVerified: true, isFollowing: false, since: '2022' }}
+            shop={{ ...shopData, isVerified: shopData.isVerified, isFollowing: false, since: new Date(shopData.createdAt).getFullYear().toString() }}
             onEdit={handleEditProfile}
             onFollow={() => Alert.alert('Follow', 'Follow action triggered')}
             onMessage={() => Alert.alert('Message', 'Message shop owner')}
           />
 
-          <StatsSection stats={mockShop.stats} onViewAnalytics={handleViewAnalytics} />
+          <StatsSection stats={shopData.stats} onViewAnalytics={handleViewAnalytics} />
 
           <PostsSection
-            posts={mockPosts}
+            posts={shopData.posts || []}
             onCreatePost={handleCreatePost}
             onPostPress={handlePostPress}
           />
 
-          <ShopInfo shop={mockShop} />
+          <ShopInfo shop={shopData} />
 
           <View style={styles.bottomSpacer} />
         </ScrollView>
@@ -99,14 +236,14 @@ const ShopProfileScreen = () => {
           visible={editModalVisible}
           onDismiss={() => setEditModalVisible(false)}
           onSave={handleSaveProfile}
-          initialProfile={mockShop}
+          initialProfile={shopData}
         />
 
         <ShareProfileModal
           visible={shareModalVisible}
           onDismiss={() => setShareModalVisible(false)}
-          shopName={mockShop.name}
-          profileUrl="https://app.example.com/shop/fashion-hub"
+          shopName={shopData.name}
+          profileUrl={`https://app.wearvirtually.com/shop/${shopData.shopUsername}`}
         />
       </View>
     </PaperProvider>
@@ -115,6 +252,7 @@ const ShopProfileScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scrollView: { flex: 1 },
   bottomSpacer: { height: 80 },
 });

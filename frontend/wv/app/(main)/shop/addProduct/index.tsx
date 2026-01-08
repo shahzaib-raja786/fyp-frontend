@@ -20,23 +20,17 @@ import UploadExistingModel from "./components/UploadExistingModel";
 import ProductMetadataForm from "./components/ProductMetadataForm";
 import CatalogSection from "./components/CatalogSection";
 
-type TabType = "upload" | "catalog" | "manage";
+type TabType = "catalog" | "manage";
 
 const ProductCatalogScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("upload");
+  const [activeTab, setActiveTab] = useState<TabType>("catalog");
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const { colors, isDark } = useTheme();
   const { spacing, radius, fonts } = appTheme.tokens;
   const router = useRouter();
 
   const tabs = useMemo(
     () => [
-      {
-        id: "upload" as TabType,
-        label: "Create 3D",
-        icon: (active: boolean) => (
-          <Upload size={20} color={active ? colors.primary : colors.textSecondary} />
-        ),
-      },
       {
         id: "catalog" as TabType,
         label: "Catalog",
@@ -46,63 +40,31 @@ const ProductCatalogScreen: React.FC = () => {
       },
       {
         id: "manage" as TabType,
-        label: "Manage",
+        label: editingProduct ? "Edit Product" : "Add Product",
         icon: (active: boolean) => (
-          <Settings size={20} color={active ? colors.primary : colors.textSecondary} />
+          editingProduct ?
+            <Settings size={20} color={active ? colors.primary : colors.textSecondary} /> :
+            <Plus size={20} color={active ? colors.primary : colors.textSecondary} />
         ),
       },
     ],
-    [colors]
+    [colors, editingProduct]
   );
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setActiveTab("manage");
+  };
+
+  const handleCreateNew = () => {
+    setEditingProduct(null);
+    setActiveTab("manage");
+  };
 
   const renderContent = () => {
     switch (activeTab) {
-      case "upload":
-        return (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            style={styles.scrollView}
-            contentContainerStyle={[
-              styles.scrollContent,
-              { paddingBottom: spacing.xl }
-            ]}
-          >
-            <View style={[
-              styles.section,
-              { marginBottom: spacing.lg }
-            ]}>
-              <Text style={[
-                styles.sectionTitle,
-                {
-                  color: colors.text,
-                  fontFamily: fonts.semiBold,
-                  fontSize: 20,
-                  marginBottom: spacing.md,
-                }
-              ]}>
-                Create 3D Product
-              </Text>
-              <Text style={[
-                styles.sectionDescription,
-                {
-                  color: colors.textSecondary,
-                  fontFamily: fonts.regular,
-                  fontSize: 14,
-                  lineHeight: 20,
-                  marginBottom: spacing.lg,
-                }
-              ]}>
-                Upload product photos or existing 3D models to create virtual try-on experiences
-              </Text>
-            </View>
-            
-            <Upload3DSection />
-            <UploadExistingModel />
-          </ScrollView>
-        );
-
       case "catalog":
-        return <CatalogSection />;
+        return <CatalogSection onEditProduct={handleEditProduct} />;
 
       case "manage":
         return (
@@ -127,7 +89,7 @@ const ProductCatalogScreen: React.FC = () => {
                   marginBottom: spacing.md,
                 }
               ]}>
-                Product Details
+                {editingProduct ? "Edit Product Details" : "New Product Details"}
               </Text>
               <Text style={[
                 styles.sectionDescription,
@@ -139,11 +101,19 @@ const ProductCatalogScreen: React.FC = () => {
                   marginBottom: spacing.lg,
                 }
               ]}>
-                Complete product information for your catalog
+                {editingProduct
+                  ? "Update your product information and images"
+                  : "Complete product information to add to your catalog"}
               </Text>
             </View>
-            
-            <ProductMetadataForm />
+
+            <ProductMetadataForm
+              editProduct={editingProduct}
+              onSuccess={() => {
+                setActiveTab("catalog");
+                setEditingProduct(null);
+              }}
+            />
           </ScrollView>
         );
 
@@ -158,15 +128,12 @@ const ProductCatalogScreen: React.FC = () => {
 
       <Tabs
         title="Product Management"
-        subtitle="Add & Organize Products"
+        subtitle="Manage your shop inventory"
         showBack
         onBackPress={() => router.back()}
         rightAction={
           <TouchableOpacity
-            onPress={() => {
-              // Navigate to add new product
-              setActiveTab("upload");
-            }}
+            onPress={handleCreateNew}
             style={[
               styles.addButton,
               {

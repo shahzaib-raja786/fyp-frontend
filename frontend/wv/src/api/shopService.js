@@ -145,9 +145,52 @@ const shopService = {
     /**
      * Update shop
      */
-    updateShop: async (shopId, shopData) => {
+    updateShop: async (shopId, shopData, images = {}) => {
         try {
-            const response = await api.put(`/shops/${shopId}`, shopData);
+            const formData = new FormData();
+
+            // Add text fields
+            Object.keys(shopData).forEach(key => {
+                if (shopData[key] !== null && shopData[key] !== undefined) {
+                    if (typeof shopData[key] === 'object') {
+                        formData.append(key, JSON.stringify(shopData[key]));
+                    } else {
+                        formData.append(key, shopData[key]);
+                    }
+                }
+            });
+
+            // Add logo if it's a new URI (not http)
+            if (images.logo && !images.logo.startsWith('http')) {
+                console.log('F-DEBUG: Uploading new logo:', images.logo);
+                formData.append('logo', {
+                    uri: images.logo,
+                    type: 'image/jpeg',
+                    name: 'logo.jpg',
+                });
+            }
+
+            // Add banner if it's a new URI (not http)
+            if (images.banner && !images.banner.startsWith('http')) {
+                console.log('F-DEBUG: Uploading new banner:', images.banner);
+                formData.append('banner', {
+                    uri: images.banner,
+                    type: 'image/jpeg',
+                    name: 'banner.jpg',
+                });
+            }
+
+            const response = await api.put(`/shops/${shopId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            // Update local storage if shop data returned
+            if (response.data.shop) {
+                await AsyncStorage.setItem('shop', JSON.stringify(response.data.shop));
+            }
+
             return response.data;
         } catch (error) {
             throw error;

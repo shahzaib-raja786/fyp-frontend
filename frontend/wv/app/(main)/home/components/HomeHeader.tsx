@@ -1,7 +1,7 @@
 // app/(main)/home/components/HomeHeader.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Heart } from 'lucide-react-native';
+import { Heart, ShoppingBag } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/context/ThemeContext';
 import { styles } from '../styles';
@@ -24,12 +24,20 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({ insets }) => {
     }]}>
       <View style={styles.headerContent}>
         <Text style={[styles.logo, { color: colors.text }]}>WearVirtually</Text>
-        <TouchableOpacity
-          style={[styles.heartButton, { backgroundColor: isDark ? colors.surface : '#FFF5F7' }]}
-          onPress={() => router.push("/(main)/saved-items")}
-        >
-          <Heart size={24} color={colors.primary} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <TouchableOpacity
+            style={[styles.heartButton, { backgroundColor: isDark ? colors.surface : '#FFF5F7' }]}
+            onPress={() => router.push("/(main)/cart")}
+          >
+            <ShoppingBag size={24} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.heartButton, { backgroundColor: isDark ? colors.surface : '#FFF5F7' }]}
+            onPress={() => router.push("/(main)/saved-items")}
+          >
+            <Heart size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

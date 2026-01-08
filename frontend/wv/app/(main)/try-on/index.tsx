@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 import { useTheme } from "@/src/context/ThemeContext";
 
@@ -25,13 +25,17 @@ import { ViewMode, ClothingItem } from "./types";
 
 const TryOnScreen = () => {
   const router = useRouter();
+  const { product } = useLocalSearchParams();
   const { theme, isDark } = useTheme();
   const { colors } = theme;
+
+  // Initial product from params if available
+  const initialProduct = product ? JSON.parse(product as string) : null;
 
   const [hasAvatar] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("3d");
   const [selectedClothing, setSelectedClothing] =
-    useState<ClothingItem | null>(null);
+    useState<ClothingItem | null>(initialProduct);
   const [isSaved, setIsSaved] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<string | null>(null);
 

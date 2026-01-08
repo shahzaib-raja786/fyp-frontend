@@ -1,5 +1,17 @@
 export type ViewMode = '3d' | 'ar';
 
+export type ClothingCategory = 't-shirts' | 'shirts' | 'pants' | 'jeans' | 'jackets' | 'hoodies' | 'dresses' | 'skirts' | 'shorts' | 'sweaters' | 'activewear' | 'shoes' | 'accessories' | 'other';
+
+export type ClothingSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL' | 'XXXL' | 'One Size';
+
+export type ShoeSize = '36' | '37' | '38' | '39' | '40' | '41' | '42' | '43' | '44' | '45';
+
+export interface ColorOption {
+    id: string;
+    name: string;
+    hex: string;
+}
+
 export interface ClothingItem {
     id: string;
     name: string;

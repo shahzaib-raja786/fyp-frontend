@@ -58,13 +58,11 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shop }) => {
           </View>
 
           <View style={styles.contactItem}>
-            <Ionicons name="call-outline" size={20} color={colors.primary} />
-            <Text style={styles.contactText}>{shop.contact.phone}</Text>
+            <Ionicons name="call-outline" size={20} color={colors.primary} /><Text style={styles.contactText}>{shop.contact.phone}</Text>
           </View>
 
           <View style={styles.contactItem}>
-            <Ionicons name="location-outline" size={20} color={colors.primary} />
-            <Text style={styles.contactText}>{shop.contact.address}</Text>
+            <Ionicons name="location-outline" size={20} color={colors.primary} /><Text style={styles.contactText}>{shop.contact.address}</Text>
           </View>
 
           {shop.contact.website && (
@@ -83,12 +81,14 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shop }) => {
             <Text style={styles.cardTitle}>Business Hours</Text>
           </View>
 
-          {Object.entries(shop.hours).map(([day, hours]) => (
+          {shop.hours ? Object.entries(shop.hours).map(([day, hours]) => (
             <View key={day} style={styles.hoursRow}>
               <Text style={styles.hoursDay}>{day}</Text>
               <Text style={styles.hoursTime}>{hours}</Text>
             </View>
-          ))}
+          )) : (
+            <Text style={styles.description}>Hours not available</Text>
+          )}
         </Card.Content>
       </Card>
 
@@ -100,14 +100,17 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shop }) => {
           </View>
 
           <View style={styles.socialContainer}>
-            {shop.social.instagram && (
-              <IconButton icon="instagram" iconColor="#E4405F" size={24} onPress={() => {}} />
+            {shop.social?.instagram && (
+              <IconButton icon="instagram" iconColor="#E4405F" size={24} onPress={() => { }} />
             )}
-            {shop.social.facebook && (
-              <IconButton icon="facebook" iconColor="#1877F2" size={24} onPress={() => {}} />
+            {shop.social?.facebook && (
+              <IconButton icon="facebook" iconColor="#1877F2" size={24} onPress={() => { }} />
             )}
-            {shop.social.twitter && (
-              <IconButton icon="twitter" iconColor="#1DA1F2" size={24} onPress={() => {}} />
+            {shop.social?.twitter && (
+              <IconButton icon="twitter" iconColor="#1DA1F2" size={24} onPress={() => { }} />
+            )}
+            {!shop.social?.instagram && !shop.social?.facebook && !shop.social?.twitter && (
+              <Text style={styles.description}>No social links available</Text>
             )}
           </View>
         </Card.Content>
@@ -140,8 +143,7 @@ const ShopInfo: React.FC<ShopInfoProps> = ({ shop }) => {
 
             <View style={styles.statItem}>
               <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#FFD700" />
-                <Text style={styles.statValue}>{shop.stats.rating.toFixed(1)}</Text>
+                <Ionicons name="star" size={16} color="#FFD700" /><Text style={styles.statValue}>{shop.stats.rating.toFixed(1)}</Text>
               </View>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
