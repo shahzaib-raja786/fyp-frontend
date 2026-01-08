@@ -62,7 +62,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'shop_owner'],
+        enum: ['user', 'shop_owner', 'admin'],
         default: 'user'
     },
     isVerified: {
@@ -88,7 +88,7 @@ userSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
 
     try {
-        const salt = await bcrypt.getSalt(10);
+        const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
     } catch (error) {
         throw error;

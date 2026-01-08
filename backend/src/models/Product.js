@@ -18,9 +18,9 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
     category: {
-        type: String,
-        required: [true, 'Category is required'],
-        enum: ['dress', 'jacket', 'shirt', 'pants', 'shoes', 'accessories', 'other']
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: [true, 'Category is required']
     },
     subcategory: {
         type: String,
@@ -73,6 +73,12 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
 
+    // Dynamic Product Specifications
+    specifications: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed
+    },
+
     // Images (Cloudinary)
     thumbnail: {
         url: {
@@ -86,15 +92,13 @@ const productSchema = new mongoose.Schema({
         publicId: String
     }],
 
-    // AR/3D Data
-    model3D: {
-        url: String,
-        publicId: String
-    },
-    arEnabled: {
+    tryon: {
         type: Boolean,
         default: false
     },
+    colors: [String],
+    sizes: [String],
+    tags: [String],
 
     // Status
     isActive: {

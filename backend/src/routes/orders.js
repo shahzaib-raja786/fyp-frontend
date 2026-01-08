@@ -14,7 +14,7 @@ router.post('/', protect, createOrder);
 router.get('/', protect, getUserOrders);
 
 // Shop routes
-router.get('/shop', shopProtect, getShopOrders);
+router.get('/shop/:shopId', shopProtect, getShopOrders);
 router.put('/:id/status', shopProtect, updateOrderStatus);
 
 // Shared routes

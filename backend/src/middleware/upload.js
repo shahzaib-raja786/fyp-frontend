@@ -22,7 +22,7 @@ const fileFilter = (req, file, cb) => {
 const uploadSingle = multer({
     storage: storage,
     limits: {
-        fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 // 5MB default
+        fileSize: parseInt(process.env.MAX_FILE_SIZE) || 50 * 1024 * 1024 // 50MB default
     },
     fileFilter: fileFilter
 }).single('image');

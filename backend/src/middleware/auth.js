@@ -44,7 +44,9 @@ const protect = async (req, res, next) => {
  */
 const restrictTo = (...roles) => {
     return (req, res, next) => {
+        console.log(`B-DEBUG: restrictTo check. User role: ${req.user.role}, Allowed roles: ${roles}`);
         if (!roles.includes(req.user.role)) {
+            console.warn(`B-DEBUG: restrictTo BLOCKED. User role ${req.user.role} not in ${roles}`);
             return res.status(403).json({
                 message: 'You do not have permission to perform this action'
             });

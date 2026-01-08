@@ -10,67 +10,59 @@ const Shop = require('../models/Shop');
  */
 const createOrder = async (req, res) => {
     try {
-        const { shopId, items, shippingAddress, paymentMethod, customerNotes } = req.body;
+        const { shippingAddress, paymentMethod, customerNotes } = req.body;
+        const Cart = require('../models/Cart');
 
-        if (!items || items.length === 0) {
-            return res.status(400).json({ message: 'No items in order' });
+        // Get user's cart
+        const cart = await Cart.findOne({ userId: req.user._id }).populate('items.productId');
+
+        if (!cart || !cart.items || cart.items.length === 0) {
+            return res.status(400).json({ message: 'Cart is empty' });
         }
+
+        // Get shopId from first product (assuming all items from same shop)
+        const shopId = cart.items[0].productId.shopId;
+
+        // Prepare order items
+        const orderItems = cart.items.map(item => ({
+            productId: item.productId._id,
+            name: item.productId.name,
+            quantity: item.quantity,
+            price: item.price,
+            selectedOptions: item.selectedOptions ? Object.fromEntries(item.selectedOptions) : {},
+            thumbnail: item.productId.thumbnail?.url || item.productId.thumbnail
+        }));
 
         // Calculate totals
-        let subtotal = 0;
-        const orderItems = [];
+        const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const shippingFee = req.body.shippingFee || 0;
+        const total = subtotal + shippingFee;
 
-        for (const item of items) {
-            const product = await Product.findById(item.productId);
-            if (!product) {
-                return res.status(404).json({ message: `Product ${item.productId} not found` });
-            }
-
-            const itemSubtotal = product.price * item.quantity;
-            subtotal += itemSubtotal;
-
-            orderItems.push({
-                productId: item.productId,
-                variantId: item.variantId,
-                productName: product.name,
-                variantDetails: item.variantDetails,
-                unitPrice: product.price,
-                quantity: item.quantity,
-                subtotal: itemSubtotal,
-                productImage: product.thumbnail
-            });
-        }
+        // Generate order number
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+        const orderNumber = `WV-${timestamp}-${random}`;
 
         // Create order
         const order = await Order.create({
+            orderNumber,
             userId: req.user._id,
             shopId,
+            items: orderItems,
             subtotal,
-            total: subtotal, // Add tax/shipping if needed
+            shippingFee,
+            total,
             shippingAddress,
-            paymentMethod,
+            paymentMethod: paymentMethod || 'cod',
             customerNotes
-        });
-
-        // Create order items
-        const createdItems = await OrderItem.insertMany(
-            orderItems.map(item => ({ ...item, orderId: order._id }))
-        );
-
-        // Update shop stats
-        await Shop.findByIdAndUpdate(shopId, {
-            $inc: {
-                'stats.totalOrders': 1,
-                'stats.totalSales': subtotal
-            }
         });
 
         res.status(201).json({
             message: 'Order created successfully',
-            order,
-            items: createdItems
+            order
         });
     } catch (error) {
+        console.error('Create order error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -94,16 +86,38 @@ const getUserOrders = async (req, res) => {
 
 /**
  * @desc    Get shop's orders
- * @route   GET /api/orders/shop
+ * @route   GET /api/orders/shop/:shopId
  * @access  Private (Shop)
  */
 const getShopOrders = async (req, res) => {
     try {
-        const orders = await Order.find({ shopId: req.shop._id })
-            .populate('userId', 'fullName email phone')
-            .sort('-createdAt');
+        const { shopId } = req.params;
+        const { status, page = 1, limit = 20 } = req.query;
 
-        res.json({ orders });
+        // Build query
+        const query = { shopId };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        // Get total count for pagination
+        const total = await Order.countDocuments(query);
+
+        // Get orders with pagination
+        const orders = await Order.find(query)
+            .populate('userId', 'fullName email phone')
+            .sort('-createdAt')
+            .limit(parseInt(limit))
+            .skip((parseInt(page) - 1) * parseInt(limit));
+
+        res.json({
+            orders,
+            pagination: {
+                total,
+                page: parseInt(page),
+                pages: Math.ceil(total / parseInt(limit))
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

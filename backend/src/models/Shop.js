@@ -92,6 +92,25 @@ const shopSchema = new mongoose.Schema({
         url: String,
         publicId: String
     },
+    hours: {
+        Monday: { type: String, default: '9:00 AM - 6:00 PM' },
+        Tuesday: { type: String, default: '9:00 AM - 6:00 PM' },
+        Wednesday: { type: String, default: '9:00 AM - 6:00 PM' },
+        Thursday: { type: String, default: '9:00 AM - 6:00 PM' },
+        Friday: { type: String, default: '9:00 AM - 6:00 PM' },
+        Saturday: { type: String, default: '10:00 AM - 4:00 PM' },
+        Sunday: { type: String, default: 'Closed' }
+    },
+    social: {
+        instagram: String,
+        facebook: String,
+        twitter: String
+    },
+    settings: {
+        notifications: { type: Boolean, default: true },
+        showOnline: { type: Boolean, default: true },
+        privateAccount: { type: Boolean, default: false }
+    },
 
     // Status
     isActive: {

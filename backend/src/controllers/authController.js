@@ -128,9 +128,24 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
     try {
         console.log("/getMe")
-        const user = await User.findById(req.user._id);
-        console.log(user);
-        res.json({ user: user.toPublicJSON() });
+        if (req.user) {
+            const user = await User.findById(req.user._id);
+            return res.json({ user: user.toPublicJSON() });
+        } else if (req.shop) {
+            // If it's a shop owner, return shop data under 'user' key for frontend compatibility
+            // or just return the shop data.
+            const shop = await (require('../models/Shop')).findById(req.shop._id);
+            return res.json({
+                user: {
+                    ...shop.toObject(),
+                    id: shop._id,
+                    role: 'shop_owner',
+                    fullName: shop.shopName,
+                    username: shop.shopUsername || shop.shopName,
+                }
+            });
+        }
+        res.status(401).json({ message: 'Not authorized' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

@@ -1,9 +1,35 @@
 const mongoose = require('mongoose');
 
+const orderItemSchema = new mongoose.Schema({
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    selectedOptions: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+    thumbnail: String
+}, { _id: false });
+
 const orderSchema = new mongoose.Schema({
     orderNumber: {
         type: String,
-        required: true,
         unique: true
     },
     userId: {
@@ -16,6 +42,7 @@ const orderSchema = new mongoose.Schema({
         ref: 'Shop',
         required: true
     },
+    items: [orderItemSchema],
 
     // Order Status
     status: {
@@ -58,12 +85,13 @@ const orderSchema = new mongoose.Schema({
 
     // Shipping Information
     shippingAddress: {
-        street: { type: String, required: true },
+        fullName: { type: String, required: true },
+        phone: { type: String, required: true },
+        address: { type: String, required: true },
         city: { type: String, required: true },
         state: String,
-        country: { type: String, required: true },
-        zipCode: { type: String, required: true },
-        phone: { type: String, required: true }
+        country: String,
+        postalCode: String
     },
     shippingMethod: {
         type: String
@@ -75,7 +103,7 @@ const orderSchema = new mongoose.Schema({
     // Payment
     paymentMethod: {
         type: String,
-        enum: ['card', 'paypal', 'cash_on_delivery'],
+        enum: ['card', 'paypal', 'cash_on_delivery', 'cod'],
         required: true
     },
     paymentStatus: {
@@ -115,15 +143,5 @@ orderSchema.index({ shopId: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ paymentStatus: 1 });
-
-// Generate order number before saving
-orderSchema.pre('save', async function (next) {
-    if (!this.orderNumber) {
-        const timestamp = Date.now().toString(36).toUpperCase();
-        const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-        this.orderNumber = `WV-${timestamp}-${random}`;
-    }
-    next();
-});
 
 module.exports = mongoose.model('Order', orderSchema);

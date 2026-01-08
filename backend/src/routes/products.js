@@ -23,7 +23,13 @@ router.post(
     createProduct
 );
 
-router.put('/:id', shopProtect, updateProduct);
+router.put(
+    '/:id',
+    shopProtect,
+    uploadProductImages,
+    handleMulterError,
+    updateProduct
+);
 router.delete('/:id', shopProtect, deleteProduct);
 
 module.exports = router;

@@ -33,12 +33,6 @@ const reviewSchema = new mongoose.Schema({
         trim: true
     },
 
-    // Images (Cloudinary)
-    images: [{
-        url: String,
-        publicId: String
-    }],
-
     // Status
     isVerifiedPurchase: {
         type: Boolean,

@@ -42,9 +42,16 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/banners', require('./routes/banners'));
+app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/saved-items', require('./routes/savedItems'));
 app.use('/api/orders', require('./routes/orders'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/returns', require('./routes/returns'));
+app.use('/api/admin', require('./routes/admin'));
+
 
 // 404 handler
 app.use(notFound);

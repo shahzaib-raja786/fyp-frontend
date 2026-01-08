@@ -171,27 +171,83 @@ const getShop = async (req, res) => {
  */
 const updateShop = async (req, res) => {
     try {
+        console.log('B-DEBUG: Updating shop:', req.params.id);
         const shop = await Shop.findById(req.params.id);
 
         if (!shop) {
             return res.status(404).json({ message: 'Shop not found' });
         }
 
-        // Check auth (assuming shop is authenticated)
-        if (shop._id.toString() !== req.shop._id.toString()) {
+        // Check auth
+        if (!req.shop || shop._id.toString() !== req.shop._id.toString()) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
-        // Update fields
-        Object.assign(shop, req.body);
+        // Allowed fields for update
+        const allowedFields = [
+            'shopName', 'description', 'category', 'businessType',
+            'phone', 'website', 'address', 'city', 'country', 'zipCode',
+            'hours', 'social', 'settings'
+        ];
+
+        // Only update allowed fields provided in request
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                let value = req.body[field];
+                // Parse JSON if it's a string (happens with FormData)
+                if (typeof value === 'string' && (field === 'hours' || field === 'social' || field === 'settings')) {
+                    try {
+                        value = JSON.parse(value);
+                    } catch (e) {
+                        console.warn(`Failed to parse ${field}:`, e.message);
+                    }
+                }
+                shop[field] = value;
+            }
+        });
+
+        // Handle image uploads
+        if (req.files) {
+            if (req.files.logo && req.files.logo[0]) {
+                const b64 = Buffer.from(req.files.logo[0].buffer).toString('base64');
+                const dataURI = `data:${req.files.logo[0].mimetype};base64,${b64}`;
+                // Delete old logo if it exists
+                if (shop.logo?.publicId) {
+                    await deleteImage(shop.logo.publicId);
+                }
+                shop.logo = await uploadImage(dataURI, 'shops/logos');
+            }
+
+            if (req.files.banner && req.files.banner[0]) {
+                const b64 = Buffer.from(req.files.banner[0].buffer).toString('base64');
+                const dataURI = `data:${req.files.banner[0].mimetype};base64,${b64}`;
+                // Delete old banner if it exists
+                if (shop.banner?.publicId) {
+                    await deleteImage(shop.banner.publicId);
+                }
+                shop.banner = await uploadImage(dataURI, 'shops/banners');
+            }
+        }
+
+        // Special handling for email if needed (usually requires verification)
+        if (req.body.email && req.body.email !== shop.email) {
+            shop.email = req.body.email;
+        }
+
         await shop.save();
+        console.log('B-DEBUG: Shop updated successfully');
 
         res.json({
             message: 'Shop updated successfully',
-            shop
+            shop: shop.toPublicJSON()
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('B-DEBUG: Update shop error:', error);
+        res.status(500).json({
+            message: 'Server error',
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
